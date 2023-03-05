@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
-import { View, Text, StyleSheet, Button} from 'react-native'
+import { View, Text, StyleSheet, Button, Alert} from 'react-native'
+import numberCard from '../components/numberCard'
 import NumberCard from '../components/numberCard'
 import Card from '../components/shadowCard'
 import Color from '../constant/constantColor'
@@ -16,6 +17,40 @@ const gameScreen = (props) => {
         return rndNum
     }
     const [numberGuess, SetNumberGuess] = useState(generateNumber(1, 100, props.numberChoice))
+    const [roundNumber, setRoundNumber] = useState(0)
+    const  currentLower = useRef(0)
+    const currentHigh = useRef(100)
+
+
+    const nextGuessHandler = direction =>{
+        if ( (direction === 'lower' && numberGuess < props.numberChoice) || (direction === 'higher' && numberGuess > props.numberChoice)){
+            Alert.alert('That a lie !', 'You know that\'s wrong', [{text:'sorry!', style:'cancel' }])
+            return;
+        }
+        if ( direction === 'lower'){
+            currentHigh.current = numberGuess
+        }
+        else{
+            currentLower.current = numberGuess
+        }
+
+        const nextGuessNumber = generateNumber(currentHigh.current, currentLower.current, numberGuess)
+        SetNumberGuess(nextGuessNumber)
+        setRoundNumber( curRnd => curRnd + 1)
+    }
+
+    const {numberChoice, onGameOver} = props;
+
+    
+    useEffect(
+        ()=>{
+            if ( numberGuess === numberChoice){
+                onGameOver(roundNumber)
+            }
+        }, [numberChoice, onGameOver, numberGuess]
+    )
+
+
   return (
     <View>
         <Text style={
@@ -29,15 +64,17 @@ const gameScreen = (props) => {
         <Card style={style.button}>
             <View style={style.setUp}>
             <Text style={{width:20,color: Color.darkpurple,}}>
-                <Button color={Color.darkpurple} title='Lower'/>
+                <Button color={Color.darkpurple} title='Lower' onPress={()=>{nextGuessHandler('lower')}}/>
                 </Text>
             
           <Text style={{width:20,color: Color.darkpurple,}}> 
-           <Button color={Color.darkpurple} title='higher'/>
+           <Button color={Color.darkpurple} title='higher' onPress={()=>{nextGuessHandler('higher')}}/>
             </Text>
             </View>
            
         </Card>
+
+
     </View>
   )
 }
