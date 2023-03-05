@@ -1,12 +1,15 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { View, Text, StyleSheet, Button, TextInput, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
 import Colors from '../constant/constantColor'
+import Card from '../components/shadowCard'
+import NumCard from '../components/numberCard'
 
 
-const startGame = () => {
+const startGame = (props) => {
     const [Value, setValue] = useState('')
     const [confirmValue, setConfirmValue] = useState(false)
     const [SelectValue, setSelectValue] = useState()    
+
 
 const confirmHandler = ()=>{
     let num = parseInt(Value)
@@ -18,32 +21,37 @@ const confirmHandler = ()=>{
     setConfirmValue(true)
     setSelectValue(num)
     setValue('')
+    Keyboard.dismiss()
 }
 const resetHandler = ()=>{
     setValue('')
+    setConfirmValue(false)
 }
 
-    let outputConfirm;
 
-    if (confirmValue){
-        outputConfirm = <View>
-            <Text>Number {SelectValue} was choosen</Text>
-        </View>
-        setConfirmValue(false)
-    }
 
 
     const AddNumberHandler = (text)=>{
-         setValue(text.replace(/[^0-9]/g,''))// replace characters which are not numerals.
+         setValue(text.replace(/[^0-9]/g,''))
          console.log(text)
      }
     
+
+     const outputConfirm = confirmValue 
+     ? (<Card>
+         <Text style={{textAlign: 'center', fontSize:15, color:Colors.darkpurple}}>Number Selected</Text>
+         <NumCard>{SelectValue}</NumCard>
+         <View style={{width:100, height:50, marginLeft:'auto', marginRight:'auto', marginTop: 20}}>
+             <Button title='Start Game' color={Colors.mediumpurple} onPress={()=>props.onStartGame(SelectValue)}/></View>
+       </Card> ) 
+     : null;
+
   return (
     <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
 <View style={style.container}>
-        <Text style={{fontSize:20, textAlign:'center', padding:10}}>Start a new Game!{'\u{1F600}'}</Text>
-        <View style={style.inputContainer}>
-            <Text style={{textAlign:'center'}}>Select a number</Text>
+        <Text style={{fontSize:20, textAlign:'center', padding:10, color:Colors.darkpurple}}>Start a new Game!{'\u{1F600}'}</Text>
+        <Card>
+            <Text style={{textAlign:'center', color:Colors.darkpurple}}>Select a number</Text>
                 <TextInput 
                 style={style.input} 
                 autoFocus
@@ -52,14 +60,14 @@ const resetHandler = ()=>{
                 autoCapitalize='none' 
                 keyboardType='number-pad' 
                 maxLength={2} 
-                onChangeText={(Value)=> AddNumberHandler(Value)}/>
+                onChangeText={(Value) => AddNumberHandler(Value)}/>
                     
                 <View style={style.buttonContainer}>
-                <View style={style.button}><Button color={Colors.mediumpurple} title='Reset' onPress={()=> setValue('')}/></View>
+                <View style={style.button}><Button color={Colors.mediumpurple} title='Reset' onPress={resetHandler}/></View>
                 <View style={style.button}><Button  color={Colors.mediumpurple} title='Confirm' onPress={confirmHandler}/></View>  
                 </View>
-        </View>
-                 {outputConfirm}
+        </Card>
+        {outputConfirm}
     </View>
     </TouchableWithoutFeedback>
   )
